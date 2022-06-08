@@ -4,9 +4,8 @@ import layout from './layout.js';
 class Keyboard {
   constructor() {
     this.caps = false;
+    this.shift = false;
     this.allButtons = [];
-    this.symbolButtons = [];
-    this.functionButtons = [];
     this.language = localStorage.getItem('lang');
   }
 
@@ -19,8 +18,11 @@ class Keyboard {
     container.appendChild(inputArea);
     const keyboard = document.createElement('div');
     keyboard.setAttribute('class', 'keyboard');
+    const notifier = document.createElement('p');
+    notifier.textContent = 'To change input language press Shift + Alt';
 
     container.appendChild(keyboard);
+    container.appendChild(notifier);
     document.body.appendChild(container);
     inputArea.focus();
 
@@ -52,21 +54,26 @@ class Keyboard {
     document.querySelector('.input-area').addEventListener('blur', () => document.querySelector('.input-area').focus());
 
     document.addEventListener('keydown', (e) => {
-      e.preventDefault();
-      this.selectAction(e);
-      const key = document.getElementById(e.code);
-      key.classList.toggle('active');
-      if (e.shiftKey && e.altKey) {
-        this.language = this.language === 'en' ? 'lt' : 'en';
-        localStorage.setItem('lang', this.language);
-        this.allButtons.forEach((button) => {
-          document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.lt : button.text.en;
-        });
-      }
-      if (e.shiftKey) {
-        this.allButtons.forEach((button) => {
-          document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.ltSpecial : button.text.enSpecial;
-        });
+      if (this.allButtons.some((el) => el.key === e.code)) {
+        e.preventDefault();
+        this.selectAction(e);
+        const key = document.getElementById(e.code);
+        if (e.code !== 'CapsLock') {
+          key.classList.toggle('active');
+        }
+        if (e.shiftKey && e.altKey) {
+          this.language = this.language === 'en' ? 'lt' : 'en';
+          localStorage.setItem('lang', this.language);
+          this.allButtons.forEach((button) => {
+            document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.lt : button.text.en;
+          });
+        }
+        if (e.code === 'CapsLock') {
+          this.toggleCaps();
+        }
+        if (e.shiftKey) {
+          this.toggleShift();
+        }
       }
     });
     document.addEventListener('keyup', (e) => {
@@ -75,7 +82,9 @@ class Keyboard {
         document.querySelector('.input-area').focus();
       }
       const key = document.getElementById(e.code);
-      key.classList.toggle('active');
+      if (e.code !== 'CapsLock') {
+        key.classList.toggle('active');
+      }
       if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         this.allButtons.forEach((pressedButton) => {
           document.getElementById(pressedButton.key).innerText = this.language === 'lt' ? pressedButton.text.lt : pressedButton.text.en;
@@ -83,13 +92,45 @@ class Keyboard {
       }
     });
     document.querySelectorAll('.keyboard-key').forEach((key) => {
-      key.addEventListener('click', (e) => {
-        e.target.classList.toggle('active');
-        setTimeout(() => {
+      key.addEventListener('mousedown', (e) => {
+        if (e.target.id === 'CapsLock') {
+          this.caps = !this.caps;
+          this.toggleCaps();
+        } else if (e.target.id === 'ShiftLeft' || e.target.id === 'ShiftRight') {
+          this.toggleShift();
+        } else {
           e.target.classList.toggle('active');
-        }, 100);
-        this.selectAction(e);
+          setTimeout(() => {
+            e.target.classList.toggle('active');
+          }, 100);
+          this.selectAction(e);
+        }
       });
+    });
+  }
+
+  toggleShift() {
+    this.shift = !this.shift;
+    this.allButtons.forEach((button) => {
+      if (this.shift) {
+        document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.ltSpecial
+          : button.text.enSpecial;
+      } else {
+        document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.lt
+          : button.text.en;
+      }
+    });
+  }
+
+  toggleCaps() {
+    this.allButtons.forEach((button) => {
+      if (this.caps) {
+        document.getElementById('CapsLock').classList.add('active');
+        document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.ltCapital : button.text.enCapital;
+      } else {
+        document.getElementById('CapsLock').classList.remove('active');
+        document.getElementById(button.key).innerText = this.language === 'lt' ? button.text.lt : button.text.en;
+      }
     });
   }
 
@@ -161,6 +202,32 @@ class Keyboard {
               + inputArea.textContent.slice(inputArea.selectionEnd);
             inputArea.selectionStart = cursorAt;
           }
+          break;
+        case 'ArrowUp':
+          inputArea.selectionStart = 0;
+          inputArea.selectionEnd = 0;
+          break;
+        case 'ArrowDown':
+          inputArea.selectionStart = inputArea.textContent.length;
+          inputArea.selectionEnd = inputArea.textContent.length;
+          break;
+        case 'ArrowLeft':
+          if (cursorAt !== 0) {
+            inputArea.selectionStart = cursorAt - 1;
+            inputArea.selectionEnd = cursorAt - 1;
+          }
+          break;
+        case 'ArrowRight':
+          if (cursorAt !== inputArea.textContent.length) {
+            inputArea.selectionStart = cursorAt + 1;
+            inputArea.selectionEnd = cursorAt + 1;
+          }
+          break;
+        case 'Enter':
+          inputArea.textContent = `${inputArea.textContent.slice(0, inputArea.selectionStart)}\n${
+            inputArea.textContent.slice(inputArea.selectionEnd)}`;
+          inputArea.selectionStart = cursorAt + 1;
+          inputArea.selectionEnd = cursorAt + 1;
           break;
         default:
           break;
