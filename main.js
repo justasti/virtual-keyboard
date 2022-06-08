@@ -229,6 +229,12 @@ class Keyboard {
           inputArea.selectionStart = cursorAt + 1;
           inputArea.selectionEnd = cursorAt + 1;
           break;
+        case 'Tab':
+          inputArea.textContent = `${inputArea.textContent.slice(0, inputArea.selectionStart)}    ${
+            inputArea.textContent.slice(inputArea.selectionEnd)}`;
+          inputArea.selectionStart = cursorAt + 4;
+          inputArea.selectionEnd = cursorAt + 4;
+          break;
         default:
           break;
       }
