@@ -167,7 +167,7 @@ const layout = [
         enSpecial: 'Backspace',
         ltSpecial: 'Backspace',
       },
-      width: 'width-4',
+      width: 'width-double',
     },
   ],
   [
@@ -366,7 +366,7 @@ const layout = [
         enSpecial: 'Caps',
         ltSpecial: 'Caps',
       },
-      width: 'width-4',
+      width: 'width-double',
     },
     {
       key: 'KeyA',
@@ -511,7 +511,7 @@ const layout = [
         enSpecial: 'Enter',
         ltSpecial: 'Enter',
       },
-      width: 'width-3',
+      width: 'width-double',
     },
   ],
   [
@@ -526,7 +526,7 @@ const layout = [
         enSpecial: 'Shift',
         ltSpecial: 'Shift',
       },
-      width: 'width-4',
+      width: 'width-double',
     },
     {
       key: 'KeyZ',
@@ -671,7 +671,7 @@ const layout = [
         enSpecial: 'Shift',
         ltSpecial: 'Shift',
       },
-      width: 'width-4',
+      width: 'width-double',
     },
   ],
   [
